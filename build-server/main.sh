@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
 
 # this will be passed as the env variable to the script
