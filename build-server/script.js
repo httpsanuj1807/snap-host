@@ -1,9 +1,8 @@
-import { exec } from 'child_process';
-import path from 'path';
-import fs from 'fs'
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import mime from 'mime-types';
-
+const { exec } = require('child_process')
+const path = require('path')
+const fs = require('fs')
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3')
+const mime = require('mime-types')
 
 const s3Client = new S3Client({
     region: 'ap-south-1',
@@ -13,7 +12,7 @@ const s3Client = new S3Client({
     }
 })
 
-const PROJECT_ID = process.env.PROJECT_ID
+const PROJECT_ID = process.env.PROJECT_ID;
 
 async function init(){
 
@@ -48,7 +47,7 @@ async function init(){
             // continue our upload
 
             const command = new PutObjectCommand({
-                Bucket: 'my-vercel-project',
+                Bucket: 'my-project-vercel',
                 Key: `__outputs/${PROJECT_ID}/${file}`,
                 Body: fs.createReadStream(filePath),
                 ContentType: mime.lookup(filePath)
