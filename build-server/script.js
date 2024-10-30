@@ -74,6 +74,7 @@ async function init(){
 
         console.log('Upload Completed');
         publishLog('Upload Completed');
+        await publisher.quit();
 
     })
     
