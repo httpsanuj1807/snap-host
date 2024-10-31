@@ -7,7 +7,7 @@ export default function Layout(){
     return(
         <>  
             <Navbar />
-            <Outlet /> {/* Dynamically renders the child route's element */}
+            <Outlet /> 
             <Footer />
         </>
     )
