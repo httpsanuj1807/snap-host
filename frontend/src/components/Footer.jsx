@@ -5,13 +5,18 @@ import { FaGithub } from "react-icons/fa";
 import { SiGmail } from "react-icons/si";
 import { Link } from "react-router-dom";
 
+import { useLocation } from "react-router-dom";
+
 
 
 
 
 export default function Footer() {
+
+  const { pathname } = useLocation();
+
   return (
-    <footer className="h-10 md:fixed px-8 py-2 flex justify-between items-center md:bottom-0 md:left-0 w-full">
+    <footer className={`h-10 ${ pathname === '/configure-project' ? '' : 'md:fixed'}  px-8 py-2 flex justify-between items-center md:bottom-0 md:left-0 w-full`}>
       <p className="hidden sm:flex items-center font-medium 600 text-sm text-[#0070f3] cursor-pointer">
         <TbPointFilled style={{ color: "#0070f3", fontSize: "1.2em" }} />
         All systems normal
