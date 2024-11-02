@@ -1,13 +1,77 @@
 import { FaUserFriends } from "react-icons/fa";
 import { FaGithub } from "react-icons/fa";
 import { IoLogoVercel } from "react-icons/io5";
-import deployImg from '../assets/deploy-img.png';
+import deployImg from "../assets/deploy-img.png";
 
-import gitRepos from "../assets/gitRepos";
 import { timeSinceLastPush } from "../utils/convertTime";
-
+import { useEffect, useRef, useState } from "react";
 
 export default function ConfigurePage() {
+  const [gitRepos, setGitRepos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [userName, setUserName] = useState("");
+  const userNameInput = useRef(null);
+
+  async function fetchRepositories() {
+    if (userName === "") {
+      setError("Username cannot be empty.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `https://api.github.com/users/${userName}/repos?per_page=5&sort=pushed&direction=desc`,
+        {
+          headers: {
+            Authorization: `token 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`, // Include the token in the Authorization header
+            Accept: "application/vnd.github.v3+json", // Optional: specify the API version
+          },
+        }
+      );
+      const responseData = await response.json();
+      setLoading(false);
+      if (!response.ok) {
+        const errorMessage =
+          response.status === 404
+            ? "Invalid github username. Please check and try again."
+            : "Something went wrong. Try again later.";
+        setError(errorMessage);
+        setGitRepos([]);
+        return;
+      }
+      localStorage.setItem("username", JSON.stringify(userName));
+      setGitRepos(responseData);
+    } catch (err) {
+      setLoading(false);
+      setError("Something went wrong. Try again later.");
+    }
+  }
+
+  useEffect(() => {
+    const username = JSON.parse(localStorage.getItem("username")) || "";
+    if (username !== "") {
+      userNameInput.current.value = username;
+      setUserName(username);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userName) {
+      fetchRepositories();
+    }
+  }, [userName]);
+
+  function handleFetch() {
+    if (userNameInput.current.value === "") {
+      setError("Username cannot be empty.");
+    } else {
+      setUserName(userNameInput.current.value);
+    }
+  }
+
   return (
     <main>
       <div className="flex flex-col md:flex-row text-center md:text-left md:flex p-12">
@@ -50,42 +114,77 @@ export default function ConfigurePage() {
                 className="px-2 py-2 rounded-r flex-1 text-sm focus:outline-none"
                 type="text"
                 required
-                defaultValue="https_anuj1807"
+                ref={userNameInput}
+                placeholder="your-github-username"
               />
             </div>
 
-            <button className="px-2 sm:px-8 rounded bg-black text-white">
+            <button
+              onClick={handleFetch}
+              disabled={loading}
+              className={`px-2 sm:px-8 rounded bg-black text-white ${
+                loading ? "opacity-90 cursor-not-allowed" : ""
+              }`}
+            >
               Import From Github
             </button>
           </div>
 
           {/* repos container */}
-          <div className="border rounded">
-            {gitRepos.map((repo, index) => {
-              return (
-                <div key={repo.name} className={`h-16 ${index === 4 ? '' : 'border-b'} flex justify-between items-center pr-4 pl-4`}>
-                  <div className="flex items-center gap-3">
-                    <IoLogoVercel />
-                    <p className="font-semibold text-gray-900">
-                      {gitRepos[index].name}{" "}
-                      <span className="text-slate-600 text-sm font-light font-mono">
-                        {" "}
-                        &#128909;{timeSinceLastPush(gitRepos[index].pushed_at)}
-                      </span>
-                    </p>
+          {gitRepos.length === 0 && !error && !loading && !userName && (
+            <p className="text-slate-600 text-center p-2 text-sm">
+              Start by entering your github username.
+            </p>
+          )}
+          {gitRepos.length === 0 && !error && !loading && userName && (
+            <p className="text-slate-600 text-center p-2 text-sm">
+              No repositories found for this account.
+            </p>
+          )}
+          {error && !loading && (
+            <p className="text-red-600 text-center p-2 text-sm">{error}</p>
+          )}
+          {!error && loading && (
+            <p className="text-slate-600 text-center p-2 text-sm">
+              Hold tight, fetching repositories for you...
+            </p>
+          )}
+
+          {gitRepos.length > 0 && !error && !loading && (
+            <div className="border rounded">
+              {" "}
+              {gitRepos.map((repo, index) => {
+                return (
+                  <div
+                    key={repo.name}
+                    className={`h-16 ${
+                      index === 4 ? "" : "border-b"
+                    } flex justify-between items-center pr-4 pl-4`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <IoLogoVercel />
+                      <p className="font-semibold text-gray-900">
+                        {gitRepos[index].name}{" "}
+                        <span className="text-slate-600 text-sm font-light font-mono">
+                          {" "}
+                          &#128909;
+                          {timeSinceLastPush(gitRepos[index].pushed_at)}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <button className="px-5 py-1 rounded bg-black text-white">
+                        Import
+                      </button>
+                    </div>
                   </div>
-                  <div>
-                    <button className="px-5 py-1 rounded bg-black text-white">
-                      Import
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
         <div className="hidden lg:flex items-center justify-center flex-1 rounded-lg ">
-            <img className="h-72 rounded-xl object-contain" src={deployImg} />
+          <img className="h-72 rounded-xl object-contain" src={deployImg} />
         </div>
       </div>
     </main>
