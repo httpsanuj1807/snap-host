@@ -6,20 +6,27 @@ import deployImg from "../assets/deploy-img.png";
 import { timeSinceLastPush } from "../utils/convertTime";
 import { useEffect, useRef, useState } from "react";
 
+import { basicActions } from "../store/basicSlice";
+import { githubActions } from "../store/githubSlice";
+import { useSelector, useDispatch } from 'react-redux';
+
 export default function ConfigurePage() {
-  const [gitRepos, setGitRepos] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [userName, setUserName] = useState("");
+
   const userNameInput = useRef(null);
+
+  const {error, loading} = useSelector(state => state.basic);
+  const {userName, gitRepos } = useSelector(state => state.github);
+  const dispatch = useDispatch();
+  const {setUserName, setGitRepos} = githubActions;
+  const {setError, toggleLoading} = basicActions;
 
   async function fetchRepositories() {
     if (userName === "") {
-      setError("Username cannot be empty.");
+      dispatch(setError("Username cannot be empty."));
       return;
     }
-    setError("");
-    setLoading(true);
+    dispatch(setError(""));
+    dispatch(toggleLoading());
 
     try {
       const response = await fetch(
@@ -32,21 +39,21 @@ export default function ConfigurePage() {
         }
       );
       const responseData = await response.json();
-      setLoading(false);
+      dispatch(toggleLoading());
       if (!response.ok) {
         const errorMessage =
           response.status === 404
             ? "Invalid github username. Please check and try again."
             : "Something went wrong. Try again later.";
-        setError(errorMessage);
-        setGitRepos([]);
+        dispatch(setError(errorMessage));
+        dispatch(setGitRepos([]));
         return;
       }
       localStorage.setItem("username", JSON.stringify(userName));
-      setGitRepos(responseData);
+      dispatch(setGitRepos(responseData));
     } catch (err) {
-      setLoading(false);
-      setError("Something went wrong. Try again later.");
+      dispatch(toggleLoading());
+      dispatch(setError("Something went wrong. Try again later."));
     }
   }
 
@@ -54,7 +61,7 @@ export default function ConfigurePage() {
     const username = JSON.parse(localStorage.getItem("username")) || "";
     if (username !== "") {
       userNameInput.current.value = username;
-      setUserName(username);
+      dispatch(setUserName(username));
     }
   }, []);
 
@@ -66,9 +73,9 @@ export default function ConfigurePage() {
 
   function handleFetch() {
     if (userNameInput.current.value === "") {
-      setError("Username cannot be empty.");
+      dispatch(setError("Username cannot be empty."));
     } else {
-      setUserName(userNameInput.current.value);
+      dispatch(setUserName(userNameInput.current.value));
     }
   }
 

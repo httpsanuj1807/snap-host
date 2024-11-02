@@ -2,6 +2,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import HomePage from './Page/HomePage.jsx'
 import ConfigurePage from './Page/ConfigurePage.jsx'
 import RootLayout from './Page/RootLayout.jsx'
+import {Provider} from 'react-redux';
+import store from "./store/store.js";
 
 const router = createBrowserRouter([
   { path:'/', 
@@ -16,9 +18,9 @@ const router = createBrowserRouter([
 export default function App(){
 
   return (
-    
-    <RouterProvider router={router} />
-
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>  
   )
 
 }
