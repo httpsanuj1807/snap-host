@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialGithubState = {
     userName: '',
     gitRepos: [],
-    repoSelected: {},
+    repoSelected: null,
 };
 
 const githubSlice = createSlice({

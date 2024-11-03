@@ -1,22 +1,23 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialBasicState = {
-    error: '',
+    error : '',
     loading: false,
-};
+}
 
 const basicSlice = createSlice({
+
     name: 'basic',
     initialState: initialBasicState,
     reducers: {  
-        setError(state, action) {
+        setError(state, action){
             state.error = action.payload;
         },
-        toggleLoading(state) {
+        toggleLoading(state){
             state.loading = !state.loading;
-        },
+        }
     }
-});
+})
 
 export const basicActions = basicSlice.actions;
 export default basicSlice.reducer;

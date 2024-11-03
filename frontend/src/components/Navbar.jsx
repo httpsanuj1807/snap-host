@@ -23,7 +23,7 @@ export default function Navbar() {
           <Link>Support</Link>
           <Link>Contact</Link>
         </div>
-       {pathname && pathname != '/configure-project' && <Link to='/configure-project'> <Button type="green">
+       {pathname && pathname === '/' && <Link to='/select-project'> <Button type="green">
           <FaPlus className="text-sm" /> Deploy
         </Button></Link>}
       </div>

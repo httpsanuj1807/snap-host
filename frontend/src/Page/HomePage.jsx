@@ -35,7 +35,7 @@ export default function HomePage() {
           </span>
         </p>
         <div className="flex gap-6 ">
-          <Link to='/configure-project'>
+          <Link to='/select-project'>
             <Button type="black">
               <IoLogoVercel /> Start Deploying
             </Button>

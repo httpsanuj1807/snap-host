@@ -4,21 +4,23 @@ import { IoLogoVercel } from "react-icons/io5";
 import deployImg from "../assets/deploy-img.png";
 
 import { timeSinceLastPush } from "../utils/convertTime";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { basicActions } from "../store/basicSlice";
 import { githubActions } from "../store/githubSlice";
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from "react-redux";
 
-export default function ConfigurePage() {
+import { useNavigate } from "react-router-dom";
 
+export default function SelectProject() {
   const userNameInput = useRef(null);
+  const navigate = useNavigate();
 
-  const {error, loading} = useSelector(state => state.basic);
-  const {userName, gitRepos } = useSelector(state => state.github);
+  const { error, loading } = useSelector((state) => state.basic);
+  const { userName, gitRepos } = useSelector((state) => state.github);
   const dispatch = useDispatch();
-  const {setUserName, setGitRepos} = githubActions;
-  const {setError, toggleLoading} = basicActions;
+  const { setUserName, setGitRepos, setSelectedRepo } = githubActions;
+  const { setError, toggleLoading } = basicActions;
 
   async function fetchRepositories() {
     if (userName === "") {
@@ -33,8 +35,8 @@ export default function ConfigurePage() {
         `https://api.github.com/users/${userName}/repos?per_page=5&sort=pushed&direction=desc`,
         {
           headers: {
-            Authorization: `token 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`, // Include the token in the Authorization header
-            Accept: "application/vnd.github.v3+json", // Optional: specify the API version
+            Authorization: import.meta.GIT_TOKEN,
+            Accept: "application/vnd.github.v3+json",
           },
         }
       );
@@ -53,6 +55,7 @@ export default function ConfigurePage() {
       dispatch(setGitRepos(responseData));
     } catch (err) {
       dispatch(toggleLoading());
+      dispatch(setGitRepos([]));
       dispatch(setError("Something went wrong. Try again later."));
     }
   }
@@ -77,6 +80,13 @@ export default function ConfigurePage() {
     } else {
       dispatch(setUserName(userNameInput.current.value));
     }
+  }
+
+  function handleImportButton(index) {
+    const selectedRepo = gitRepos[index];
+    dispatch(setSelectedRepo(selectedRepo));
+    localStorage.setItem("repoSelected", JSON.stringify(selectedRepo));
+    navigate(`/deploy-project/${selectedRepo.name}`);
   }
 
   return (
@@ -107,7 +117,7 @@ export default function ConfigurePage() {
       {/* form */}
 
       <div className="px-4 sm:px-12 flex flex-col lg:flex-row gap-8 justify-between">
-        <div className="border rounded-lg bg-white p-6 md:p-4   lg:w-3/5">
+        <div className="border rounded-lg bg-white p-6 md:p-4  lg:w-3/5">
           <p className="text-2xl font-semibold text-gray-900 mb-4">
             Import Git Repository
           </p>
@@ -118,6 +128,11 @@ export default function ConfigurePage() {
                 <FaGithub size="18" />
               </span>
               <input
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleFetch();
+                  }
+                }}
                 className="px-2 py-2 rounded-r flex-1 text-sm focus:outline-none"
                 type="text"
                 required
@@ -180,7 +195,10 @@ export default function ConfigurePage() {
                       </p>
                     </div>
                     <div>
-                      <button className="px-5 py-1 rounded bg-black text-white">
+                      <button
+                        onClick={() => handleImportButton(index)}
+                        className="px-5 py-1 rounded bg-black text-white"
+                      >
                         Import
                       </button>
                     </div>

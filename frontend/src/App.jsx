@@ -1,16 +1,18 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import HomePage from './Page/HomePage.jsx'
-import ConfigurePage from './Page/ConfigurePage.jsx'
+import DeployProject from './Page/DeployProject.jsx'
 import RootLayout from './Page/RootLayout.jsx'
 import {Provider} from 'react-redux';
 import store from "./store/store.js";
+import SelectProject from "./Page/SelectProject.jsx"
 
 const router = createBrowserRouter([
   { path:'/', 
     element: <RootLayout />,
     children: [
       { index:true, element: <HomePage /> },
-      { path:'/configure-project', element: <ConfigurePage /> },
+      { path:'/select-project', element: <SelectProject /> },
+      { path:'/deploy-project/:id', element: <DeployProject /> },
     ]
   }
 ])
