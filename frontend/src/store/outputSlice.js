@@ -4,7 +4,7 @@ const initialOuputSlice = {
   projectName: "",
   previewUrl: "",
   logs: [],
-  isSuccess: false,
+  deployProgress: 'notStarted',   // notStarted, deploying, deployFailed, deploySuccess
 };
 
 const outputSlice = createSlice({
@@ -24,8 +24,8 @@ const outputSlice = createSlice({
       }
       state.logs = [...state.logs, action.payload];
     },
-    setIsSuccess(state) {
-      state.isSuccess = !state.isSuccess;
+    setDeployProgress(state, action) {
+      state.deployProgress = action.payload;
     },
   },
 });

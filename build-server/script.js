@@ -40,7 +40,13 @@ async function init(){
         console.log(`Error : ${error.toString()}`);
     });
 
-    p.on('close', async() => {
+    p.on('close', async(code) => {
+        if (code !== 0) {
+            console.log("Build Failed");
+            publishLog("Build Failed, please refer logs for fixes and retry.");
+            await publisher.quit();
+            return; // Exit early if build failed
+        }
         console.log("Build Completed");
         publishLog("Build Completed");
         const distFolderPath = path.join(outDirPath, 'dist');

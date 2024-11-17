@@ -22,16 +22,15 @@ export default function DeployProject() {
   const { repoSelected } = useSelector((state) => state.github);
   const { pageState } = useSelector((state) => state.basic);
   const { slug, gitURL, envVar } = useSelector((state) => state.input);
-  const { isSuccess, previewUrl } = useSelector((state) => state.output);
+  const { deployProgress, previewUrl } = useSelector((state) => state.output);
   const { setSelectedRepo } = githubActions;
   const { setSlug, setGitUrl } = inputActions;
   const { setPageState, toggleLoading } = basicActions;
-  const { setProjectName, setPreviewUrl, setLogs, setIsSuccess } =
+  const { setProjectName, setPreviewUrl, setLogs, setDeployProgress } =
     outputActions;
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
 
   useEffect(() => {
     if (!repoSelected) {
@@ -63,16 +62,22 @@ export default function DeployProject() {
     if (slug) {
       socket.on("message", (message) => {
         const parsedMessage = JSON.parse(message);
-        if (parsedMessage.log === "Upload Completed") {
-          dispatch(setIsSuccess());
-        }
         dispatch(setLogs(parsedMessage.log));
+        if (parsedMessage.log === "Upload Completed") {
+          dispatch(setDeployProgress("deploySuccess"));
+        }
+        if (
+          parsedMessage.log ===
+          "Build Failed, please refer logs for fixes and retry."
+        ) {
+          dispatch(setDeployProgress("deployFailed"));
+        }
       });
     }
     return () => {
       if (slug) {
         socket.emit("unsubscribe", `logs:${slug}`);
-        socket.off("message"); 
+        socket.off("message");
       }
     };
   }, [dispatch, slug]);
@@ -101,9 +106,9 @@ export default function DeployProject() {
       dispatch(setPreviewUrl(resData.data.url));
     }
 
-
     setTimeout(() => {
       dispatch(toggleLoading());
+      dispatch(setDeployProgress('deploying'))
       dispatch(setPageState("deploy"));
     }, 2000);
   }
@@ -118,19 +123,27 @@ export default function DeployProject() {
       ) : (
         <TopTitle
           title={
-            isSuccess ? `Deployment Completed` : "We are building for you."
+            (deployProgress === "deploying" && "We are building for you.") ||
+            (deployProgress === "deployFailed" && "Deployment Failed.") ||
+            (deployProgress === "deploySuccess" && "Deployment Completed")
           }
           subHeading={
-            isSuccess? (
+            (deployProgress === "deploySuccess" && (
               <>
                 You can now preview your deployment here:{" "}
-                <a className="text-gray-900 font-semibold" href={previewUrl} target="_blank">
+                <a
+                  className="text-gray-900 font-semibold"
+                  href={previewUrl}
+                  target="_blank"
+                >
                   {previewUrl}
                 </a>
               </>
-            ) : (
-              "You can preview your deployment once we set up for you."
-            )
+            )) ||
+            (deployProgress === "deploying" &&
+              "You can preview your deployment once we set up for you.") ||
+            (deployProgress === "deployFailed" &&
+              "Deployment failed for some reasons. Please refer logs for fixes.")
           }
         />
       )}
