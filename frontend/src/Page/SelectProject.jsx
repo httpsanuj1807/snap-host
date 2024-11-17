@@ -8,6 +8,7 @@ import { useEffect, useRef } from "react";
 
 import { basicActions } from "../store/basicSlice";
 import { githubActions } from "../store/githubSlice";
+import { outputActions } from "../store/outputSlice";
 import { useSelector, useDispatch } from "react-redux";
 
 import { useNavigate } from "react-router-dom";
@@ -20,7 +21,7 @@ export default function SelectProject() {
   const { userName, gitRepos } = useSelector((state) => state.github);
   const dispatch = useDispatch();
   const { setUserName, setGitRepos, setSelectedRepo } = githubActions;
-  const { setError, toggleLoading } = basicActions;
+  const { setError, toggleLoading, setPageState } = basicActions;
 
   async function fetchRepositories() {
     if (userName === "") {
@@ -86,6 +87,8 @@ export default function SelectProject() {
     const selectedRepo = gitRepos[index];
     dispatch(setSelectedRepo(selectedRepo));
     localStorage.setItem("repoSelected", JSON.stringify(selectedRepo));
+    dispatch(setPageState('configure'));
+
     navigate(`/deploy-project/${selectedRepo.name}`);
   }
 

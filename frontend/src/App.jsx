@@ -5,6 +5,7 @@ import RootLayout from './Page/RootLayout.jsx'
 import {Provider} from 'react-redux';
 import store from "./store/store.js";
 import SelectProject from "./Page/SelectProject.jsx"
+import NotFound from "./Page/NotFound.jsx";
 
 const router = createBrowserRouter([
   { path:'/', 
@@ -13,6 +14,7 @@ const router = createBrowserRouter([
       { index:true, element: <HomePage /> },
       { path:'/select-project', element: <SelectProject /> },
       { path:'/deploy-project/:id', element: <DeployProject /> },
+      { path:'/*', element: <NotFound /> },
     ]
   }
 ])

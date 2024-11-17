@@ -20,6 +20,7 @@ import Button from "../components/Button";
 export default function HomePage() {
   return (
     <main className="flex flex-col">
+
       <div className="px-8 lg:px-24 py-5 lg-py-10 pb-5 flex flex-col gap-4 text-center justify-center items-center">
         <h1 className="text-3xl sm:text-5xl font-bold text-gray-900">
           From localhost to https, in seconds
@@ -45,6 +46,7 @@ export default function HomePage() {
           </Link>
         </div>
       </div>
+      
       <div className="px-8 lg:px-24 gap-8 pb-5 lg:gap-8 flex-1 flex flex-col md:flex-row  justify-between items-center ">
         <div className="h-full w-full md:w-2/5 p-8 md:p-4 lg:p-8">
           <p className="text-xl sm:text-2xl text-gray-900 font-bold mb-2">

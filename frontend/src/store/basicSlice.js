@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialBasicState = {
     error : '',
     loading: false,
+    pageState: 'configure'
 }
 
 const basicSlice = createSlice({
@@ -15,6 +16,9 @@ const basicSlice = createSlice({
         },
         toggleLoading(state){
             state.loading = !state.loading;
+        },
+        setPageState(state, action){
+            state.pageState = action.payload
         }
     }
 })

@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialInputState = {
-  slug: null,
+  slug: '',
   gitURL: null,
   framework: {
     name: "craReact",
