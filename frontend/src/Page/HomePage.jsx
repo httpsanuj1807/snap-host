@@ -41,7 +41,7 @@ export default function HomePage() {
               <IoLogoVercel /> Start Deploying
             </Button>
           </Link>
-          <Link>
+          <Link to='/'>
             <Button type="white">Watch Demo</Button>
           </Link>
         </div>

@@ -6,6 +6,9 @@ import {Provider} from 'react-redux';
 import store from "./store/store.js";
 import SelectProject from "./Page/SelectProject.jsx"
 import NotFound from "./Page/NotFound.jsx";
+import Contact from "./Page/Contact.jsx";
+import Support from "./Page/Support.jsx";
+import Documentation from "./Page/Docs.jsx";
 
 const router = createBrowserRouter([
   { path:'/', 
@@ -14,6 +17,9 @@ const router = createBrowserRouter([
       { index:true, element: <HomePage /> },
       { path:'/select-project', element: <SelectProject /> },
       { path:'/deploy-project/:id', element: <DeployProject /> },
+      { path:'/contact', element: <Contact /> },
+      { path:'/support', element: <Support /> },
+      { path:'/docs', element: <Documentation /> },
       { path:'/*', element: <NotFound /> },
     ]
   }

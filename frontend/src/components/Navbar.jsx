@@ -18,10 +18,10 @@ export default function Navbar() {
       </div>
       <div className="h-full flex px-4 items-center gap-8">
         <div className="hidden sm:flex items-center gap-3">
-          <Link>Home</Link>
-          <Link>Docs</Link>
-          <Link>Support</Link>
-          <Link>Contact</Link>
+          <Link to='/'>Home</Link>
+          <Link to='/docs'>Docs</Link>
+          <Link to='/support'>Support</Link>
+          <Link to='/contact'>Contact</Link>
         </div>
        {pathname && pathname === '/' && <Link to='/select-project'> <Button type="green">
           <FaPlus className="text-sm" /> Deploy
