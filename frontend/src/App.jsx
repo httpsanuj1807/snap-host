@@ -8,18 +8,26 @@ import SelectProject from "./Page/SelectProject.jsx"
 import NotFound from "./Page/NotFound.jsx";
 import Contact from "./Page/Contact.jsx";
 import Support from "./Page/Support.jsx";
-import Documentation from "./Page/Docs.jsx";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import PrivateRoute from "./components/PrivateComponent.jsx";
 
 const router = createBrowserRouter([
   { path:'/', 
     element: <RootLayout />,
     children: [
+
+      // non protected routes
       { index:true, element: <HomePage /> },
-      { path:'/select-project', element: <SelectProject /> },
-      { path:'/deploy-project/:id', element: <DeployProject /> },
       { path:'/contact', element: <Contact /> },
       { path:'/support', element: <Support /> },
-      { path:'/docs', element: <Documentation /> },
+
+
+      // protected route [must authenticate before accessing]
+      { path:'/select-project', element: <PrivateRoute><SelectProject /></PrivateRoute> },
+      { path:'/deploy-project/:id', element: <PrivateRoute><DeployProject /></PrivateRoute> },
+
+      // not found route
       { path:'/*', element: <NotFound /> },
     ]
   }
@@ -29,7 +37,8 @@ export default function App(){
 
   return (
     <Provider store={store}>
-      <RouterProvider router={router} />
+    <ToastContainer />
+     <RouterProvider router={router} />
     </Provider>  
   )
 

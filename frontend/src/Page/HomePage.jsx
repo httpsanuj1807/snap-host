@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { IoLogoVercel } from "react-icons/io5";
 import { AiOutlineGlobal } from "react-icons/ai";
@@ -8,6 +8,8 @@ import { FaRocket } from "react-icons/fa6";
 
 import customerImg from "../assets/customer.png";
 
+import { useSelector } from "react-redux";
+
 const liItems = [
   "Deploy automatically from git",
   "Previews for logs",
@@ -16,8 +18,33 @@ const liItems = [
 ];
 
 import Button from "../components/Button";
+import { toast } from "react-toastify";
+
 
 export default function HomePage() {
+
+  const { isAuth } = useSelector(state => state.auth);
+
+  const navigate = useNavigate();
+
+  
+  function handleStartDeploying(){
+
+    if(!isAuth){
+
+      toast.dismiss();
+      toast.error('Please login first', {
+        autoClose: 4000, pauseOnHover: false
+      });
+      
+      return;
+
+    }
+
+    navigate('/select-project');
+
+  }
+
   return (
     <main className="flex flex-col">
 
@@ -36,11 +63,11 @@ export default function HomePage() {
           </span>
         </p>
         <div className="flex gap-6 ">
-          <Link to='/select-project'>
+          <div onClick={handleStartDeploying}>
             <Button type="black">
               <IoLogoVercel /> Start Deploying
             </Button>
-          </Link>
+          </div>
           <Link to='/'>
             <Button type="white">Watch Demo</Button>
           </Link>

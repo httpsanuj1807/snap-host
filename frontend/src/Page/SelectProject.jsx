@@ -1,42 +1,38 @@
 import { FaUserFriends } from "react-icons/fa";
 import { FaGithub } from "react-icons/fa";
 import { IoLogoVercel } from "react-icons/io5";
+import { RiGitRepositoryCommitsFill } from "react-icons/ri";
 import deployImg from "../assets/deploy-img.png";
 
 import { timeSinceLastPush } from "../utils/convertTime";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 import { basicActions } from "../store/basicSlice";
 import { githubActions } from "../store/githubSlice";
-import { outputActions } from "../store/outputSlice";
 import { useSelector, useDispatch } from "react-redux";
 
 import { useNavigate } from "react-router-dom";
 
 export default function SelectProject() {
-  const userNameInput = useRef(null);
   const navigate = useNavigate();
 
   const { error, loading } = useSelector((state) => state.basic);
-  const { userName, gitRepos } = useSelector((state) => state.github);
+  const { gitRepos } = useSelector((state) => state.github);
+  const { userProfile } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  const { setUserName, setGitRepos, setSelectedRepo } = githubActions;
+  const { setGitRepos, setSelectedRepo } = githubActions;
   const { setError, toggleLoading, setPageState } = basicActions;
 
   async function fetchRepositories() {
-    if (userName === "") {
-      dispatch(setError("Username cannot be empty."));
-      return;
-    }
     dispatch(setError(""));
     dispatch(toggleLoading());
 
     try {
       const response = await fetch(
-        `https://api.github.com/users/${userName}/repos?per_page=5&sort=pushed&direction=desc`,
+        `https://api.github.com/users/${userProfile.userName}/repos?per_page=5&sort=pushed&direction=desc`,
         {
           headers: {
-            Authorization: import.meta.GIT_TOKEN,
+            Authorization: import.meta.env.VITE_GIT_TOKEN,
             Accept: "application/vnd.github.v3+json",
           },
         }
@@ -52,7 +48,6 @@ export default function SelectProject() {
         dispatch(setGitRepos([]));
         return;
       }
-      localStorage.setItem("username", JSON.stringify(userName));
       dispatch(setGitRepos(responseData));
     } catch (err) {
       dispatch(toggleLoading());
@@ -61,36 +56,18 @@ export default function SelectProject() {
     }
   }
 
-  useEffect(() => {
-    const username = JSON.parse(localStorage.getItem("username")) || "";
-    if (username !== "") {
-      userNameInput.current.value = username;
-      dispatch(setUserName(username));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (userName) {
-      fetchRepositories();
-    }
-  }, [userName]);
-
-  function handleFetch() {
-    if (userNameInput.current.value === "") {
-      dispatch(setError("Username cannot be empty."));
-    } else {
-      dispatch(setUserName(userNameInput.current.value));
-    }
-  }
-
   function handleImportButton(index) {
     const selectedRepo = gitRepos[index];
     dispatch(setSelectedRepo(selectedRepo));
     localStorage.setItem("repoSelected", JSON.stringify(selectedRepo));
-    dispatch(setPageState('configure'));
+    dispatch(setPageState("configure"));
 
     navigate(`/deploy-project/${selectedRepo.name}`);
   }
+
+  useEffect(() => {
+    fetchRepositories();
+  }, [userProfile]);
 
   return (
     <main>
@@ -119,53 +96,57 @@ export default function SelectProject() {
 
       {/* form */}
 
-      <div className="px-4 sm:px-12 flex flex-col lg:flex-row gap-8 justify-between">
-        <div className="border rounded-lg bg-white p-6 md:p-4  lg:w-3/5">
-          <p className="text-2xl font-semibold text-gray-900 mb-4">
-            Import Git Repository
-          </p>
+      <div className="px-4 sm:px-12  flex flex-col lg:flex-row gap-8 justify-between">
+        <div className="border rounded-lg p-2  md:p-4  lg:w-3/5">
 
-          <div className="flex  justify-start gap-4 mb-2">
-            <div className=" flex sm:w-1/2 gap-3 items-center rounded pl-3 border-2 border-gray-100">
+          <div className="flex justify-between font-semibold text-gray-900 mb-4">
+            <div className="text-xl flex-1 sm:text-2xl">Import Git Repository</div>
+            <div className=" flex gap-3 w-1/3   items-center rounded pl-3 border-2 border-gray-100">
               <span>
                 <FaGithub size="18" />
               </span>
               <input
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleFetch();
-                  }
-                }}
-                className="px-2 py-2 rounded-r flex-1 text-sm focus:outline-none"
+                className="py-2 rounded-r w-full flex-1 text-xs focus:outline-none"
                 type="text"
                 required
-                ref={userNameInput}
-                placeholder="your-github-username"
+                value={userProfile.userName}
+                readOnly
+              />
+            </div>
+          </div>
+
+          <div className="flex  justify-start gap-4 mb-2">
+            <div className=" flex sm:w-1/2 gap-3  items-center rounded pl-3 border-2 border-gray-100">
+              <span>
+                <RiGitRepositoryCommitsFill  size="18" />
+              </span>
+              <input
+                className="px-2 py-2 rounded-r flex-1 text-xs focus:outline-none"
+                type="text"
+                placeholder="your-github-repository"
               />
             </div>
 
             <button
-              onClick={handleFetch}
               disabled={loading}
-              className={`px-2 sm:px-8 rounded bg-black text-white ${
+              className={`px-2 text-xs sm:px-8 rounded bg-black text-white ${
                 loading ? "opacity-90 cursor-not-allowed" : ""
               }`}
             >
-              Import From Github
+              Search a repository
             </button>
           </div>
 
           {/* repos container */}
-          {gitRepos.length === 0 && !error && !loading && !userName && (
-            <p className="text-slate-600 text-center p-2 text-sm">
-              Start by entering your github username.
-            </p>
-          )}
-          {gitRepos.length === 0 && !error && !loading && userName && (
-            <p className="text-slate-600 text-center p-2 text-sm">
-              No repositories found for this account.
-            </p>
-          )}
+
+          {gitRepos.length === 0 &&
+            !error &&
+            !loading &&
+            userProfile.userName && (
+              <p className="text-slate-600 text-center p-2 text-sm">
+                No repositories found for this account.
+              </p>
+            )}
           {error && !loading && (
             <p className="text-red-600 text-center p-2 text-sm">{error}</p>
           )}
@@ -188,7 +169,7 @@ export default function SelectProject() {
                   >
                     <div className="flex items-center gap-3">
                       <IoLogoVercel />
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-xs text-gray-900">
                         {gitRepos[index].name}{" "}
                         <span className="text-slate-600 text-sm font-light font-mono">
                           {" "}

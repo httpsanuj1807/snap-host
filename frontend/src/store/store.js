@@ -3,6 +3,7 @@ import basicReducer from './basicSlice.js'
 import githubReducer from './githubSlice.js'
 import inputReducer from './inputSlice.js'
 import outputReducer from './outputSlice.js'
+import authReducer from './authSlice.js'
 
 const store = configureStore({
 
@@ -11,6 +12,7 @@ const store = configureStore({
         github: githubReducer,
         input: inputReducer,
         output: outputReducer,
+        auth: authReducer
     }
 
 });
