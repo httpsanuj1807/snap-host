@@ -3,9 +3,29 @@ const { ECSClient, RunTaskCommand } = require("@aws-sdk/client-ecs");
 const { Server } = require("socket.io");
 const Redis = require("ioredis");
 const cors = require("cors");
+const mongoose = require('mongoose');
+const authRouter = require('./routes/auth.routes.js');
+const cookieParser = require('cookie-parser');
+
 
 const app = express();
 const PORT = 9000;
+
+require("dotenv").config();
+
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["POST", "GET"],
+    credentials: true,
+  })
+);
+
 
 const io = new Server({ cors: "*" });
 
@@ -13,15 +33,13 @@ io.listen(9002, () => {
   console.log("Socket server running at port 9002");
 });
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    methods: ["POST", "GET"],
-  })
-);
-
-app.use(express.json());
-require("dotenv").config();
+mongoose.connect(process.env.MONGODB_URL)
+.then(() => {
+  console.log('Connected to MongoDB');
+})
+.catch((error) => {
+  console.error('Error connecting to MongoDB:', error);
+});
 
 const serviceUrl = process.env.REDIS_URL;
 const subscriber = new Redis(serviceUrl);
@@ -89,6 +107,8 @@ app.post("/project", async (req, res) => {
   });
 });
 
+
+
 const subscribedChannels = new Set();
 
 subscriber.on("message", (channel, message) => {
@@ -104,6 +124,9 @@ async function initRedisSubscribe(projectSlug) {
     subscribedChannels.add(channel);
   }
 }
+
+
+app.use('/api/auth', authRouter);
 
 app.listen(PORT, () => {
   console.log(`API server is running on port ${PORT}`);
