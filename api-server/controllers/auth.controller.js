@@ -15,10 +15,10 @@ async function githubAuth(req, res) {
   }
 
   try {
-    const user = await User.findOne({ email });
+    let user = await User.findOne({ email });
 
     if (!user) {
-      const user = new User(userDetails);
+      user = new User(userDetails);
       await user.save();
     }
 
@@ -38,7 +38,7 @@ async function githubAuth(req, res) {
 }
 
 
-async function isVerifiedUser(req, res, next){
+async function isVerifiedUser(req, res){
 
     if(req.access_token && req.userId){
 
@@ -51,15 +51,23 @@ async function isVerifiedUser(req, res, next){
         }
         catch(err){
 
-          return res.status(200).json({messgae: "Unauthorized request."});
+          return res.status(200).json({message: "Unauthorized request."});
 
         }
-        
     
     }
 
-    return res.status(401).json({message: "Unauthorized request."});
+    return res.status(200).json({message: "Unauthorized request."});
 
 }
 
-module.exports = {githubAuth, isVerifiedUser};
+async function signOut(req, res, next) {
+  try{
+      res.clearCookie('access_token').status(200).json('Sign out successfully');
+  }
+  catch(err){
+      next(err);
+  }
+}
+
+module.exports = {githubAuth, isVerifiedUser, signOut};

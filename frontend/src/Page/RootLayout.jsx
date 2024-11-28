@@ -24,7 +24,7 @@ export default function Layout() {
 
         const resData = await res.json();
 
-        if (res.ok) {
+        if (res.ok && resData.data) {
           dispatch(setIsLogin(resData.data));
         }
 

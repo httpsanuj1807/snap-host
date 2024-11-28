@@ -5,7 +5,7 @@ import { RiGitRepositoryCommitsFill } from "react-icons/ri";
 import deployImg from "../assets/deploy-img.png";
 
 import { timeSinceLastPush } from "../utils/convertTime";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { basicActions } from "../store/basicSlice";
 import { githubActions } from "../store/githubSlice";
@@ -22,6 +22,8 @@ export default function SelectProject() {
   const dispatch = useDispatch();
   const { setGitRepos, setSelectedRepo } = githubActions;
   const { setError, toggleLoading, setPageState } = basicActions;
+
+  const repoInputFieldRef = useRef(null);
 
   async function fetchRepositories() {
     dispatch(setError(""));
@@ -68,6 +70,12 @@ export default function SelectProject() {
   useEffect(() => {
     fetchRepositories();
   }, [userProfile]);
+
+  function handleSearchRepo(){
+
+    console.log(repoInputFieldRef.current.value);
+
+  }
 
   return (
     <main>
@@ -121,6 +129,7 @@ export default function SelectProject() {
                 <RiGitRepositoryCommitsFill  size="18" />
               </span>
               <input
+                ref={repoInputFieldRef}
                 className="px-2 py-2 rounded-r flex-1 text-xs focus:outline-none"
                 type="text"
                 placeholder="your-github-repository"
@@ -129,6 +138,7 @@ export default function SelectProject() {
 
             <button
               disabled={loading}
+              onClick={handleSearchRepo}
               className={`px-2 text-xs sm:px-8 rounded bg-black text-white ${
                 loading ? "opacity-90 cursor-not-allowed" : ""
               }`}

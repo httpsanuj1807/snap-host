@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { GithubAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebase/config.js";
 
@@ -8,19 +8,28 @@ import { useDispatch } from "react-redux";
 import { authActions } from "../store/authSlice.js";
 
 import Button from "./Button";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { FaGithub } from "react-icons/fa";
+
+import { FiLogOut } from "react-icons/fi";
+import { Tooltip as ReactTooltip } from "react-tooltip";
 
 export default function Navbar() {
   const provider = new GithubAuthProvider();
   const dispatch = useDispatch();
-  const { setIsLogin } = authActions;
+  const { setIsLogin, setIsLogout } = authActions;
   const { isAuth, userProfile } = useSelector((state) => state.auth);
 
   const handleStartAuth = async () => {
     try {
+
+      provider.setCustomParameters({
+        prompt: "select_account", 
+      });
+
       const res = await signInWithPopup(auth, provider);
+
       const user = res.user;
 
       let userDetails = {
@@ -50,7 +59,10 @@ export default function Navbar() {
         }
 
         const userProfile = responseData.data;
-        toast.success("Login Success", {autoClose: 2000, pauseOnHover: false});
+        toast.success("Login Success", {
+          autoClose: 2000,
+          pauseOnHover: false,
+        });
         dispatch(setIsLogin(userProfile));
       } catch (err) {
         toast.error("Something went wrong.");
@@ -60,7 +72,19 @@ export default function Navbar() {
     }
   };
 
-  const { pathname } = useLocation();
+  async function handleLogout() {
+    const response = await fetch("http://localhost:9000/api/auth/signout", {
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      toast.error("Something went wrong.");
+      return;
+    }
+
+    dispatch(setIsLogout());
+    toast.success("Signout Success", { autoClose: 2000, pauseOnHover: false });
+  }
 
   return (
     <nav className="bg-slate-900 h-16 px-4 text-white flex justify-between py-3 md:px-16 items-center ">
@@ -75,13 +99,29 @@ export default function Navbar() {
           <Link to="/support">Support</Link>
           <Link to="/contact">Contact</Link>
         </div>
-        
-          <p onClick={isAuth ? undefined : handleStartAuth}>
-            <Button>
-              {isAuth ? `${userProfile.userName}` : (<><FaGithub size={24} /> Login</>)}
-            </Button>
-          </p>
-        
+
+        <p onClick={isAuth ? undefined : handleStartAuth}>
+          <Button>
+            {isAuth ? (
+              `${userProfile.userName}`
+            ) : (
+              <>
+                <FaGithub size={24} /> Login
+              </>
+            )}
+          </Button>
+        </p>
+        {isAuth && (
+          <div className="cursor-pointer" onClick={handleLogout}>
+            <p data-tooltip-id="logout-tooltip" data-tooltip-content="Logout">
+              <FiLogOut size={28} />
+            </p>
+            <ReactTooltip
+              style={{ backgroundColor: "#15803d", color: "#ffffff" }}
+              id="logout-tooltip"
+            />
+          </div>
+        )}
       </div>
     </nav>
   );
