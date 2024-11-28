@@ -5,7 +5,7 @@ import { RiGitRepositoryCommitsFill } from "react-icons/ri";
 import deployImg from "../assets/deploy-img.png";
 
 import { timeSinceLastPush } from "../utils/convertTime";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { basicActions } from "../store/basicSlice";
 import { githubActions } from "../store/githubSlice";
@@ -25,13 +25,15 @@ export default function SelectProject() {
 
   const repoInputFieldRef = useRef(null);
 
+  const [repoToShow, setRepoToShow] = useState([]);
+
   async function fetchRepositories() {
     dispatch(setError(""));
     dispatch(toggleLoading());
 
     try {
       const response = await fetch(
-        `https://api.github.com/users/${userProfile.userName}/repos?per_page=5&sort=pushed&direction=desc`,
+        `https://api.github.com/users/${userProfile.userName}/repos?sort=pushed&direction=desc`,
         {
           headers: {
             Authorization: import.meta.env.VITE_GIT_TOKEN,
@@ -40,6 +42,8 @@ export default function SelectProject() {
         }
       );
       const responseData = await response.json();
+      console.log(responseData);
+
       dispatch(toggleLoading());
       if (!response.ok) {
         const errorMessage =
@@ -51,6 +55,7 @@ export default function SelectProject() {
         return;
       }
       dispatch(setGitRepos(responseData));
+      setRepoToShow([...responseData.slice(0, 5)]);
     } catch (err) {
       dispatch(toggleLoading());
       dispatch(setGitRepos([]));
@@ -71,10 +76,25 @@ export default function SelectProject() {
     fetchRepositories();
   }, [userProfile]);
 
-  function handleSearchRepo(){
+  function handleSearchRepo() {
+    const searchQuery = repoInputFieldRef.current.value.toLowerCase().trim();
 
-    console.log(repoInputFieldRef.current.value);
+    const searchWords = searchQuery.toLowerCase().split(" ");
 
+    const topRepos = gitRepos
+    .map((repo) => {
+      const repoNameLower = repo.name.toLowerCase();
+      const score = searchWords.reduce((acc, word) => {
+        return repoNameLower.includes(word) ? acc + 1 : acc;
+      }, 0);
+
+      return { ...repo, score };
+    })
+    .filter((repo) => repo.score > 0) 
+    .sort((a, b) => b.score - a.score) 
+    .slice(0, 5); 
+
+    setRepoToShow(topRepos);
   }
 
   return (
@@ -106,9 +126,10 @@ export default function SelectProject() {
 
       <div className="px-4 sm:px-12  flex flex-col lg:flex-row gap-8 justify-between">
         <div className="border rounded-lg p-2  md:p-4  lg:w-3/5">
-
           <div className="flex justify-between font-semibold text-gray-900 mb-4">
-            <div className="text-xl flex-1 sm:text-2xl">Import Git Repository</div>
+            <div className="text-xl flex-1 sm:text-2xl">
+              Import Git Repository
+            </div>
             <div className=" flex gap-3 w-1/3   items-center rounded pl-3 border-2 border-gray-100">
               <span>
                 <FaGithub size="18" />
@@ -126,12 +147,17 @@ export default function SelectProject() {
           <div className="flex  justify-start gap-4 mb-2">
             <div className=" flex sm:w-1/2 gap-3  items-center rounded pl-3 border-2 border-gray-100">
               <span>
-                <RiGitRepositoryCommitsFill  size="18" />
+                <RiGitRepositoryCommitsFill size="18" />
               </span>
               <input
                 ref={repoInputFieldRef}
                 className="px-2 py-2 rounded-r flex-1 text-xs focus:outline-none"
                 type="text"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    handleSearchRepo(); 
+                  }
+                }}
                 placeholder="your-github-repository"
               />
             </div>
@@ -149,12 +175,12 @@ export default function SelectProject() {
 
           {/* repos container */}
 
-          {gitRepos.length === 0 &&
+          {repoToShow.length === 0 &&
             !error &&
             !loading &&
             userProfile.userName && (
               <p className="text-slate-600 text-center p-2 text-sm">
-                No repositories found for this account.
+                No repositories to show.
               </p>
             )}
           {error && !loading && (
@@ -166,10 +192,10 @@ export default function SelectProject() {
             </p>
           )}
 
-          {gitRepos.length > 0 && !error && !loading && (
+          {repoToShow.length > 0 && !error && !loading && (
             <div className="border rounded">
               {" "}
-              {gitRepos.map((repo, index) => {
+              {repoToShow.map((repo, index) => {
                 return (
                   <div
                     key={repo.name}
@@ -180,11 +206,11 @@ export default function SelectProject() {
                     <div className="flex items-center gap-3">
                       <IoLogoVercel />
                       <p className="font-semibold text-xs text-gray-900">
-                        {gitRepos[index].name}{" "}
+                        {repoToShow[index].name}{" "}
                         <span className="text-slate-600 text-sm font-light font-mono">
                           {" "}
                           &#128909;
-                          {timeSinceLastPush(gitRepos[index].pushed_at)}
+                          {timeSinceLastPush(repoToShow[index].pushed_at)}
                         </span>
                       </p>
                     </div>
