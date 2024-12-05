@@ -42,9 +42,6 @@ export default function SelectProject() {
         }
       );
       const responseData = await response.json();
-      console.log(responseData);
-
-      dispatch(toggleLoading());
       if (!response.ok) {
         const errorMessage =
           response.status === 404
@@ -52,10 +49,12 @@ export default function SelectProject() {
             : "Something went wrong. Try again later.";
         dispatch(setError(errorMessage));
         dispatch(setGitRepos([]));
+        dispatch(toggleLoading());
         return;
       }
       dispatch(setGitRepos(responseData));
       setRepoToShow([...responseData.slice(0, 5)]);
+      dispatch(toggleLoading());
     } catch (err) {
       dispatch(toggleLoading());
       dispatch(setGitRepos([]));
@@ -64,7 +63,7 @@ export default function SelectProject() {
   }
 
   function handleImportButton(index) {
-    const selectedRepo = gitRepos[index];
+    const selectedRepo = repoToShow[index];
     dispatch(setSelectedRepo(selectedRepo));
     localStorage.setItem("repoSelected", JSON.stringify(selectedRepo));
     dispatch(setPageState("configure"));

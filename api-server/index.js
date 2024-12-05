@@ -59,9 +59,12 @@ const ecsClient = new ECSClient({
   },
 });
 
+// task 5 for cloud redis
+// task 6 for local redis
+
 const config = {
   cluster: "arn:aws:ecs:ap-south-1:654654421610:cluster/builder-cluster",
-  task: "arn:aws:ecs:ap-south-1:654654421610:task-definition/builder-task:4",
+  task: "arn:aws:ecs:ap-south-1:654654421610:task-definition/builder-task:5",
 };
 
 app.post("/project", async (req, res) => {
@@ -103,7 +106,7 @@ app.post("/project", async (req, res) => {
   await ecsClient.send(command);
   return res.json({
     status: "queued",
-    data: { projectSlug, url: `http://${projectSlug}.${process.env.BACKEND_HOST}` },
+    data: { projectSlug, url: `http://${projectSlug}.${process.env.PROXY_SERVER}` },
   });
 });
 
