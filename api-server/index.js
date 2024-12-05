@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: "http://15.207.116.235",
+    origin: "http://43.204.233.198",
     methods: ["POST", "GET"],
     credentials: true,
   })
@@ -103,7 +103,7 @@ app.post("/project", async (req, res) => {
   await ecsClient.send(command);
   return res.json({
     status: "queued",
-    data: { projectSlug, url: `http://${projectSlug}.15.207.116.235:8000` },
+    data: { projectSlug, url: `http://${projectSlug}.43.204.233.198:8000` },
   });
 });
 
