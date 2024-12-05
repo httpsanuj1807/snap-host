@@ -14,7 +14,7 @@ import TopTitle from "../components/TopTitle";
 import Sidebar from "../components/Sidebar";
 import { outputActions } from "../store/outputSlice";
 
-const socket = io(`${import.meta.env.VITE_BACKEND_URL}${VITE_SOCKET_PORT}`);
+const socket = io(`${import.meta.env.VITE_BACKEND_URL}${import.meta.env.VITE_SOCKET_PORT}`);
 
 export default function DeployProject() {
   const { id } = useParams();
@@ -86,7 +86,7 @@ export default function DeployProject() {
     e.preventDefault();
     dispatch(toggleLoading());
 
-    const response = await fetch("http://localhost:9000/project", {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}${import.meta.env.VITE_BACKEND_PORT}/project`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
