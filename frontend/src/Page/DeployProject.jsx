@@ -14,7 +14,7 @@ import TopTitle from "../components/TopTitle";
 import Sidebar from "../components/Sidebar";
 import { outputActions } from "../store/outputSlice";
 
-const socket = io("http://localhost:9002");
+const socket = io(`${import.meta.env.VITE_BACKEND_URL}${VITE_SOCKET_PORT}`);
 
 export default function DeployProject() {
   const { id } = useParams();

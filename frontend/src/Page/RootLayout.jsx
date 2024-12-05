@@ -14,7 +14,7 @@ export default function Layout() {
   useEffect(() => {
     async function checkAuth() {
       try {
-        const res = await fetch("http://localhost:9000/api/auth/verify-user", {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}${import.meta.env.VITE_BACKEND_PORT}/api/auth/verify-user`, {
           method: "GET",
           credentials: "include",
           headers: {

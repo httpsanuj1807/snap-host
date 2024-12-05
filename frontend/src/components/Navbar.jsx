@@ -42,7 +42,7 @@ export default function Navbar() {
       const expirationTime = user.stsTokenManager.expirationTime;
 
       try {
-        const response = await fetch("http://localhost:9000/api/auth/github", {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}${import.meta.env.VITE_BACKEND_PORT}/api/auth/github`, {
           method: "POST",
           credentials: "include",
           headers: {
@@ -73,7 +73,7 @@ export default function Navbar() {
   };
 
   async function handleLogout() {
-    const response = await fetch("http://localhost:9000/api/auth/signout", {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}${import.meta.env.VITE_BACKEND_PORT}/api/auth/signout`, {
       credentials: "include",
     });
 
