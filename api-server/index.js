@@ -128,6 +128,10 @@ async function initRedisSubscribe(projectSlug) {
   }
 }
 
+app.get('/test', (req, res) => {
+  return res.status(200).json("Backend running");
+})
+
 
 app.use('/api/auth', authRouter);
 
